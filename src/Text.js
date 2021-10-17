@@ -5,6 +5,7 @@ import { useEffect } from 'react/cjs/react.development';
 const fabric = window.fabric;
 
 class Text extends React.Component {
+
     static propTypes = {
         canvas: PropTypes.object,
         top: PropTypes.number.isRequired,
