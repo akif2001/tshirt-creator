@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react/cjs/react.development';
 
 const fabric = window.fabric;
 
 class Text extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.componentDidMount = this.componentDidMount.bind(this);
+    }
+
+    state = {
+        isShowButtons: false,
+    }
 
     static propTypes = {
         canvas: PropTypes.object,
@@ -12,7 +21,6 @@ class Text extends React.Component {
         left: PropTypes.number.isRequired,
         fill: PropTypes.string.isRequired,
         text: PropTypes.string.isRequired,
-        
     }
 
     static defaultProps = {
@@ -26,8 +34,18 @@ class Text extends React.Component {
 
         text.set("text", this.props.text);
         this.props.canvas.renderAll();
-           
+
         this.props.canvas.add(text);
+
+        this.props.canvas.on('object:selected', (e) => {
+            this.setState({ isShowButtons: true });
+            console.log("bu:", this.state.isShowButtons);
+        });
+
+        this.props.canvas.on('selection:cleared', (e) => {
+            this.setState({ isShowButtons: false });
+            console.log("bu:", this.state.isShowButtons);
+        });
     }
 
     render() {
