@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { createRef, useState } from 'react';
 import PropTypes from 'prop-types';
+
+//import App from 'App.js';
 
 const fabric = window.fabric;
 
@@ -9,6 +11,7 @@ class Text extends React.Component {
         super(props);
 
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.cIsShowButtonLabel = createRef();
     }
 
     state = {
@@ -49,6 +52,8 @@ class Text extends React.Component {
     }
 
     render() {
+        const { cIsShowButtons } = this.props;
+
         return null;
     }
 }
