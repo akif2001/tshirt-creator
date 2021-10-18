@@ -23,6 +23,9 @@ const App = () => {
   const [text, setText] = useState("");
   const [isAddingText, setIsAddingText] = useState(false);
   const [arrayText, setArrayText] = useState([]);
+  const [refText, setRefText] = useState(null);
+  const [isSelectedText, setIsSelectedText] = useState(false);
+  const [newText, setNewText] = useState("");
 
   const [url, setUrl] = useState("");
   const [isAddingImage, setIsAddingImage] = useState(false);
@@ -39,10 +42,25 @@ const App = () => {
   const [isAddingCircle, setIsAddingCircle] = useState(false);
   const [arrayCircle, setArrayCircle] = useState([]);
 
+  useEffect(() => {
+    if (refText === null) return;
+
+    console.log("refText:", refText);
+
+    refText.props.canvas.on("object:selected", (e) => {
+      setIsSelectedText(true);
+
+      setNewText(refText.props.text);
+      refText.setState({ stateText: newText });
+    });
+
+    refText.props.canvas.on("selection:cleared", (e) => {
+      setIsSelectedText(false);
+    });
+  }, [refText]);
+
   const mapBackgroundImage = () => {
     return arrayBackgroundImage.map((x, i) => {
-      console.log("bg-img:", x.backgroundImageUrl);
-
       return (
         <StillImage key={i} url={x.backgroundImageUrl} />
       );
@@ -64,8 +82,11 @@ const App = () => {
 
   const mapText = () => {
     return arrayText.map((x, i) => {
+      
+      //setNewText(x.textName);
+      
       return (
-        <Text key={i} text={x.textName} />
+        <Text key={i} text={x.textName} ref={ref => setRefText(ref)} />
       );
     });
   }
@@ -79,6 +100,14 @@ const App = () => {
     } else {
       setIsAddingText(true);
     }
+  }
+
+  const onAddNewText = (e) => {
+    setNewText(e);
+
+    refText.setState({ stateText: newText });
+
+    console.log("setNewText, refText:", refText.state.stateText);
   }
 
   const mapImage = () => {
@@ -178,6 +207,15 @@ const App = () => {
           null}
         <button onClick={() => onAddingCircle()} disabled={isDisabledButtons}>Daire Ekle</button>
       </div>
+
+      <div>
+        {isSelectedText ?
+        <div>
+          <input type="text" value={newText} onChange={e => onAddNewText(e.target.value)} placeholder="Değiştirmek istediğiniz yazıyı giriniz:" />
+        </div>
+      :
+      null}
+        </div>
 
       <DesignCanvas>
         {mapBackgroundImage()}

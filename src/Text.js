@@ -11,11 +11,11 @@ class Text extends React.Component {
         super(props);
 
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.cIsShowButtonLabel = createRef();
     }
 
     state = {
         isShowButtons: false,
+        stateText: "",
     }
 
     static propTypes = {
@@ -33,10 +33,9 @@ class Text extends React.Component {
     }
 
     componentDidMount() {
-        const text = new fabric.IText(this.props.text, this.props);
+        //this.setState({ stateText: this.props.text });
 
-        text.set("text", this.props.text);
-        this.props.canvas.renderAll();
+        const text = new fabric.IText(this.state.stateText, this.props);
 
         this.props.canvas.add(text);
 
@@ -49,11 +48,17 @@ class Text extends React.Component {
             this.setState({ isShowButtons: false });
             console.log("bu:", this.state.isShowButtons);
         });
+
+        this.props.canvas.on('object:modified', (e) => {
+            console.log("inş cal:", text);
+        });
+
+        //this.setState({ stateText: text });
+
+        console.log("this.setState:", this.state.stateText);
     }
 
     render() {
-        const { cIsShowButtons } = this.props;
-
         return null;
     }
 }
