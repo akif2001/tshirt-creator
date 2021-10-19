@@ -26,6 +26,19 @@ const App = () => {
   const [refText, setRefText] = useState(null);
   const [isSelectedText, setIsSelectedText] = useState(false);
   const [newText, setNewText] = useState("");
+  const [newTextColor, setNewTextColor] = useState("");
+  const [newTextFontFamily, setNewTextFontFamily] = useState([
+    { label: "-hiçbiri-", value: "unset" },
+    { label: "-moz-initial", value: "-moz-initial" },
+    { label: "cursive", value: "cursive" },
+    { label: "fantasy", value: "fantasy" },
+    { label: "inherit", value: "inherit" },
+    { label: "initial", value: "initial" },
+    { label: "monospace", value: "monospace" },
+    { label: "revert", value: "revert" },
+    { label: "sans-serif", value: "sans-serif" },
+    { label: "serif", value: "serif" },
+  ]);
 
   const [url, setUrl] = useState("");
   const [isAddingImage, setIsAddingImage] = useState(false);
@@ -50,14 +63,23 @@ const App = () => {
     refText.props.canvas.on("object:selected", (e) => {
       setIsSelectedText(true);
 
-      setNewText(refText.props.text);
-      refText.setState({ stateText: newText });
+      setNewText(refText.state.stateText);
+      setNewTextColor(refText.state.stateColor);
+      document.getElementById('select').value = refText.state.stateFontFamily;
     });
 
     refText.props.canvas.on("selection:cleared", (e) => {
       setIsSelectedText(false);
     });
-  }, [refText]);
+
+    refText.props.canvas.on('object:modified', (e) => {
+      console.log("Object: Text güncellendi!");
+    });
+
+    refText.props.canvas.on('selection:updated', (e) => {
+      console.log("Selection: Text güncellendi!");
+    });
+  });
 
   const mapBackgroundImage = () => {
     return arrayBackgroundImage.map((x, i) => {
@@ -82,9 +104,6 @@ const App = () => {
 
   const mapText = () => {
     return arrayText.map((x, i) => {
-      
-      //setNewText(x.textName);
-      
       return (
         <Text key={i} text={x.textName} ref={ref => setRefText(ref)} />
       );
@@ -107,7 +126,25 @@ const App = () => {
 
     refText.setState({ stateText: newText });
 
-    console.log("setNewText, refText:", refText.state.stateText);
+    console.log("setNewText:", newText, ", refText:", refText.state.stateText);
+  }
+
+  const onAddNewTextColor = (e) => {
+    setNewTextColor(e);
+
+    refText.setState({ stateColor: newTextColor });
+  }
+
+  const mapNewTextFontFamily = () => {
+    return newTextFontFamily.map((x, i) => {
+      return (
+        <option key={i} value={x.value} style={{ fontFamily: x.value }}>{x.label}</option>
+      )
+    });
+  }
+
+  const addNewTextFontFamily = (changedValue) => {
+    refText.setState({ stateFontFamily: changedValue });
   }
 
   const mapImage = () => {
@@ -168,7 +205,7 @@ const App = () => {
   }
 
   return (
-    <div>
+    <div style={{ fontFamily: "-moz-initial" }}>
       <div>
         {isAddingBackgroundImage ?
           <input type="text" value={urlBackgroundImage} onChange={(e) => setUrlBackgroundImage(e.target.value)} placeholder="T-shirt resmi ekleyiniz:" />
@@ -210,12 +247,16 @@ const App = () => {
 
       <div>
         {isSelectedText ?
-        <div>
-          <input type="text" value={newText} onChange={e => onAddNewText(e.target.value)} placeholder="Değiştirmek istediğiniz yazıyı giriniz:" />
-        </div>
-      :
-      null}
-        </div>
+          <div>
+            <input type="text" value={newText} onChange={e => onAddNewText(e.target.value)} placeholder="Değiştirmek istediğiniz yazıyı giriniz:" />
+            <input type="text" value={newTextColor} onChange={e => onAddNewTextColor(e.target.value)} placeholder="Değiştirmek istediğiniz rengi giriniz:" />
+            <select value={newTextFontFamily.value} onChange={e => addNewTextFontFamily(e.target.value)} id="select">
+              {mapNewTextFontFamily()}
+            </select>
+          </div>
+          :
+          null}
+      </div>
 
       <DesignCanvas>
         {mapBackgroundImage()}

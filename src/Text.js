@@ -11,11 +11,15 @@ class Text extends React.Component {
         super(props);
 
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
     }
 
     state = {
+        text: new fabric.IText("", this.props),
         isShowButtons: false,
         stateText: "",
+        stateColor: "black",
+        stateFontFamily: "unset",
     }
 
     static propTypes = {
@@ -33,11 +37,11 @@ class Text extends React.Component {
     }
 
     componentDidMount() {
-        //this.setState({ stateText: this.props.text });
+        this.setState({ stateText: this.props.text });
 
-        const text = new fabric.IText(this.state.stateText, this.props);
+        //this.setState({ text:  });
 
-        this.props.canvas.add(text);
+        this.props.canvas.add(this.state.text);
 
         this.props.canvas.on('object:selected', (e) => {
             this.setState({ isShowButtons: true });
@@ -49,13 +53,15 @@ class Text extends React.Component {
             console.log("bu:", this.state.isShowButtons);
         });
 
-        this.props.canvas.on('object:modified', (e) => {
-            console.log("inş cal:", text);
-        });
-
         //this.setState({ stateText: text });
 
         console.log("this.setState:", this.state.stateText);
+    }
+
+    componentDidUpdate() {
+        this.state.text.text = this.state.stateText;
+        this.state.text.fill = this.state.stateColor;
+        this.state.text.fontFamily = this.state.stateFontFamily;
     }
 
     render() {
