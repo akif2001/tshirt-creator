@@ -14,11 +14,9 @@ import Text from './Text';
 
 const App = () => {
 
-  const [urlBackgroundImage, setUrlBackgroundImage] = useState("");
-  const [isAddingBackgroundImage, setIsAddingBackgroundImage] = useState(false);
-  const [arrayBackgroundImage, setArrayBackgroundImage] = useState([]);
-
-  const [isDisabledButtons, setIsDisabledButtons] = useState(true);
+  const [arrayBackgroundImage, setArrayBackgroundImage] = useState([
+    { backgroundImageUrl: "https://i.stack.imgur.com/OaxYU.jpg" },
+  ]);
 
   const [text, setText] = useState("");
   const [isAddingText, setIsAddingText] = useState(false);
@@ -39,6 +37,7 @@ const App = () => {
     { label: "sans-serif", value: "sans-serif" },
     { label: "serif", value: "serif" },
   ]);
+  const [objectSelecting, setObjectSelecting] = useState(null);
 
   const [url, setUrl] = useState("");
   const [isAddingImage, setIsAddingImage] = useState(false);
@@ -56,20 +55,31 @@ const App = () => {
   const [arrayCircle, setArrayCircle] = useState([]);
 
   useEffect(() => {
-    if (refText === null) return;
-
-    console.log("refText:", refText);
+    if (refText === null) {
+      console.log("refText değeri null");
+      return;
+    } 
+    
+    console.log("refText değeri null değil");
 
     refText.props.canvas.on("object:selected", (e) => {
+      console.log("e:", e);
+
+      setObjectSelecting(e);
+
       setIsSelectedText(true);
 
-      setNewText(refText.state.stateText);
-      setNewTextColor(refText.state.stateColor);
-      document.getElementById('select').value = refText.state.stateFontFamily;
+      setNewText(refText.props.canvas.getActiveObject().text);
+      setNewTextColor(refText.props.canvas.getActiveObject().fill);
+      if (document.getElementById('select') !== null)
+        document.getElementById('select').value = refText.props.canvas.getActiveObject().fontFamily;
     });
 
     refText.props.canvas.on("selection:cleared", (e) => {
       setIsSelectedText(false);
+
+      refText.props.canvas.dirty = true;
+      refText.props.canvas.renderAll();
     });
 
     refText.props.canvas.on('object:modified', (e) => {
@@ -87,19 +97,6 @@ const App = () => {
         <StillImage key={i} url={x.backgroundImageUrl} />
       );
     });
-  }
-
-  const onAddingBackgroundImage = () => {
-    if (isAddingBackgroundImage) {
-      if (urlBackgroundImage === null || urlBackgroundImage === "") return setIsAddingBackgroundImage(false);
-
-      setArrayBackgroundImage([...arrayBackgroundImage, { backgroundImageUrl: urlBackgroundImage }]);
-      setIsAddingBackgroundImage(false);
-      setIsDisabledButtons(false);
-      alert("Ekrana bir kere tıklayınız.")
-    } else {
-      setIsAddingBackgroundImage(true);
-    }
   }
 
   const mapText = () => {
@@ -124,27 +121,49 @@ const App = () => {
   const onAddNewText = (e) => {
     setNewText(e);
 
+    refText.props.canvas.getActiveObject().set({
+      text: newText,
+    });
+
     refText.setState({ stateText: newText });
 
-    console.log("setNewText:", newText, ", refText:", refText.state.stateText);
+    refText.props.canvas.renderAll();
+
+    console.log("refText.props.canvas.getActiveObject():", refText.props.canvas.getActiveObject());
   }
 
   const onAddNewTextColor = (e) => {
     setNewTextColor(e);
 
+    refText.props.canvas.getActiveObject().set({
+      fill: newTextColor,
+    });
+
     refText.setState({ stateColor: newTextColor });
+
+    refText.props.canvas.renderAll();
+
+    console.log("refText (e):", refText.props.canvas.getActiveObject().originalState);
   }
 
   const mapNewTextFontFamily = () => {
     return newTextFontFamily.map((x, i) => {
       return (
         <option key={i} value={x.value} style={{ fontFamily: x.value }}>{x.label}</option>
-      )
+      );
     });
   }
 
   const addNewTextFontFamily = (changedValue) => {
+    refText.props.canvas.getActiveObject().set({
+      fontFamily: changedValue,
+    });
+    
     refText.setState({ stateFontFamily: changedValue });
+
+    console.log("refText:", refText);
+
+    refText.props.canvas.renderAll();
   }
 
   const mapImage = () => {
@@ -205,25 +224,19 @@ const App = () => {
   }
 
   return (
-    <div style={{ fontFamily: "-moz-initial" }}>
+    <div>
       <div>
-        {isAddingBackgroundImage ?
-          <input type="text" value={urlBackgroundImage} onChange={(e) => setUrlBackgroundImage(e.target.value)} placeholder="T-shirt resmi ekleyiniz:" />
-          :
-          null}
-        <button onClick={() => onAddingBackgroundImage()}>T-Shirt Resmi Ekle</button>
-
         {isAddingText ?
           <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="Eklenecek yazıyı giriniz:" />
           :
           null}
-        <button onClick={() => onAddingText()} disabled={isDisabledButtons}>Yazı Ekle</button>
+        <button onClick={() => onAddingText()}>Yazı Ekle</button>
 
         {isAddingImage ?
           <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Eklenecek resimin url adresini giriniz:" />
           :
           null}
-        <button onClick={() => onAddingImage()} disabled={isDisabledButtons}>Resim Ekle</button>
+        <button onClick={() => onAddingImage()}>Resim Ekle</button>
 
         {isAddingRect ?
           <div>
@@ -233,7 +246,7 @@ const App = () => {
           </div>
           :
           null}
-        <button onClick={() => onAddingRect()} disabled={isDisabledButtons}>Kare Ekle</button>
+        <button onClick={() => onAddingRect()}>Kare Ekle</button>
 
         {isAddingCircle ?
           <div>
@@ -242,7 +255,7 @@ const App = () => {
           </div>
           :
           null}
-        <button onClick={() => onAddingCircle()} disabled={isDisabledButtons}>Daire Ekle</button>
+        <button onClick={() => onAddingCircle()}>Daire Ekle</button>
       </div>
 
       <div>

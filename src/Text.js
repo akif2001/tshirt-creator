@@ -20,6 +20,7 @@ class Text extends React.Component {
         stateText: "",
         stateColor: "black",
         stateFontFamily: "unset",
+        stateNum: null,
     }
 
     static propTypes = {
@@ -28,15 +29,19 @@ class Text extends React.Component {
         left: PropTypes.number.isRequired,
         fill: PropTypes.string.isRequired,
         text: PropTypes.string.isRequired,
+        dirty: PropTypes.bool.isRequired,
     }
 
     static defaultProps = {
         top: 0,
         left: 0,
         fill: "black",
+        dirty: true,
     }
 
     componentDidMount() {
+        //fabric.Object.prototype.objectCaching = true;
+
         this.setState({ stateText: this.props.text });
 
         //this.setState({ text:  });
@@ -51,11 +56,18 @@ class Text extends React.Component {
         this.props.canvas.on('selection:cleared', (e) => {
             this.setState({ isShowButtons: false });
             console.log("bu:", this.state.isShowButtons);
+
+            //this.setState({ stateColor:  });
+            console.log("Text: setState değişti! + ", this.state.stateColor, "=", e);
         });
 
-        //this.setState({ stateText: text });
+        this.props.canvas.on('mouse:out', (e) => {           
+            //this.props.canvas.renderAll();
+        });
 
         console.log("this.setState:", this.state.stateText);
+
+        //this.setState({ stateNum: this.props.canvas.setActiveObject(this.props.canvas.item(0)) });
     }
 
     componentDidUpdate() {
